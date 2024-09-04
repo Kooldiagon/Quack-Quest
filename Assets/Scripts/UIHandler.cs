@@ -2,17 +2,28 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class UIHandler : MonoBehaviour
+public class UIHandler : SingletonMonoBehaviour<UIHandler>
 {
-    // Start is called before the first frame update
-    void Start()
+    [SerializeField]
+    private GameObject startScreen;
+
+    private ThemeConfig theme;
+
+    public ThemeConfig Theme { get => theme; }
+
+    private void OnEnable()
     {
-        
+        EventHandler.Instance.OnServicesInitialised += ShowScreen;
     }
 
-    // Update is called once per frame
-    void Update()
+    private void OnDisable()
     {
-        
+        EventHandler.Instance.OnServicesInitialised -= ShowScreen;
+    }
+
+    private void ShowScreen()
+    {
+        theme = UnityServicesHandler.Instance.RemoteConfig.Json<ThemeConfig>("Colour Theme");
+        startScreen.SetActive(true);
     }
 }
