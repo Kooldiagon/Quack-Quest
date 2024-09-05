@@ -47,9 +47,9 @@ public class UIHandler : SingletonMonoBehaviour<UIHandler>
 
     public void ClearChildren(RectTransform rectTransform)
     {
-        foreach (Transform child in rectTransform)
+        while (rectTransform.childCount != 0)
         {
-            ObjectPool.Instance.Remove(child.gameObject);
+            ObjectPool.Instance.Remove(rectTransform.GetChild(0).gameObject);
         }
     }
 

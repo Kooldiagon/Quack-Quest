@@ -9,6 +9,7 @@ public class GameScreen : MonoBehaviour
     [SerializeField] private UIText scoreText, comboText, healthText;
     [SerializeField] private GameObject cardPrefab;
     [SerializeField] private GridLayoutGroup grid;
+    [SerializeField] private RectTransform gridRT;
 
     void OnEnable()
     {
@@ -28,7 +29,10 @@ public class GameScreen : MonoBehaviour
 
     private void NewPile(List<Sprite> cards)
     {
-        UIHandler.Instance.ClearChildren(grid.GetComponent<RectTransform>());
+        UIHandler.Instance.ClearChildren(gridRT);
+        float width = (float)Screen.width + gridRT.sizeDelta.x, height = (float)Screen.height + gridRT.sizeDelta.y;
+        float cellSize = Mathf.Min((width - (grid.spacing.x * (GameManager.Instance.Coloums - 1))) / GameManager.Instance.Coloums, (height - (grid.spacing.y * (GameManager.Instance.Rows - 1))) / GameManager.Instance.Rows);
+        grid.cellSize = Vector2.one * cellSize;
         grid.constraintCount = GameManager.Instance.Coloums;
 
         while (cards.Count > 0)
@@ -48,7 +52,7 @@ public class GameScreen : MonoBehaviour
     {
         yield return new WaitForSeconds(3f);
 
-        foreach (Transform child in grid.GetComponent<RectTransform>())
+        foreach (Transform child in gridRT)
         {
             child.GetComponent<Card>().Flip();
             yield return new WaitForFixedUpdate();

@@ -27,7 +27,7 @@ public class EventHandler : Singleton<EventHandler>
     public event Action OnHealthChanged;
     public void HealthChanged() // Called when the health's value is changed
     {
-        OnScoreChanged?.Invoke();
+        OnHealthChanged?.Invoke();
     }
 
     public event Action<List<Sprite>> OnCardsShuffled;

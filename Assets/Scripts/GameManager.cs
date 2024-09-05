@@ -34,8 +34,8 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
         SetScore(0);
         SetCombo(0);
         SetHealth(5);
-        coloums = 4;
-        rows = 4;
+        coloums = 2;
+        rows = 2;
 
         ShuffleCards();
     }
@@ -52,8 +52,8 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
         {
             SetCombo(combo + 1);
             SetScore(score + combo);
-            cardsMatched += 2;
-            if (cardsMatched == coloums * rows)
+            cardsMatched++;
+            if (cardsMatched == (int)Math.Floor((double)(coloums * rows) / 2))
             {
                 NewLevel();
             }

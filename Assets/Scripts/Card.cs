@@ -30,16 +30,15 @@ public class Card : MonoBehaviour
     // Called when the card is clicked by the player
     public void PlayerFlip()
     {
-        Flip();
-        EventHandler.Instance.CardClicked(this);
+        StartCoroutine(FlipAnimation(true));
     }
 
     public void Flip()
     {
-        StartCoroutine(FlipAnimation());
+        StartCoroutine(FlipAnimation(false));
     }
 
-    private IEnumerator FlipAnimation()
+    private IEnumerator FlipAnimation(bool playerInteraction)
     {
         button.interactable = false;
 
@@ -62,6 +61,7 @@ public class Card : MonoBehaviour
             yield return new WaitForFixedUpdate();
         }
 
+        if (playerInteraction) EventHandler.Instance.CardClicked(this);
         if (image.sprite == back) button.interactable = true;
 
     }
