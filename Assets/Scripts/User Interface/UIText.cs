@@ -4,7 +4,7 @@ using UnityEngine;
 public class UIText : MonoBehaviour
 {
     [SerializeField] private QuackQuest.Theme fontColour;
-    [SerializeField] private float maxWidth;
+    [SerializeField] private float maxHeight, maxWidth;
 
     private TextMeshProUGUI tmp;
     private RectTransform rt;
@@ -25,5 +25,9 @@ public class UIText : MonoBehaviour
         float newWidth = tmp.preferredWidth;
         if (maxWidth != 0) newWidth = Mathf.Min(tmp.preferredWidth, maxWidth);
         rt.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, newWidth);
+
+        float newHeight = tmp.preferredHeight;
+        if (maxHeight != 0) newHeight = Mathf.Min(tmp.preferredHeight, maxHeight);
+        rt.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, newHeight);
     }
 }

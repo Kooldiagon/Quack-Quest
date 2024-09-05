@@ -1,31 +1,28 @@
+using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class UIHandler : SingletonMonoBehaviour<UIHandler>
 {
-    [SerializeField]
-    private GameObject startScreen;
+    [SerializeField] private GameObject startScreen;
+    [SerializeField] private PopUp popUp;
     private GameObject currentScreen;
 
     private ThemeConfig theme;
 
     public ThemeConfig Theme { get => theme; }
 
-    private void OnEnable()
-    {
-        EventHandler.Instance.OnServicesInitialised += LoadUI;
-    }
-
-    private void OnDisable()
-    {
-        EventHandler.Instance.OnServicesInitialised -= LoadUI;
-    }
-
-    private void LoadUI()
+    public void LoadUI()
     {
         theme = UnityServicesHandler.Instance.RemoteConfig.Json<ThemeConfig>("Colour Theme");
         ChangeScreen(startScreen);
+    }
+
+    public void ShowPopUp(string messageText, Action _acceptAction, Action _declineAction)
+    {
+        popUp.gameObject.SetActive(true);
+        popUp.SetUp(messageText, _acceptAction, _declineAction);
     }
 
     public void ChangeScreen(GameObject newScreen)

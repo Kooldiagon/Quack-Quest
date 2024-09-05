@@ -25,6 +25,7 @@ public class Card : MonoBehaviour
         image.sprite = front;
         cardID = _front.name;
         button.interactable = false;
+        transform.localScale = Vector3.one;
     }
 
     // Called when the card is clicked by the player

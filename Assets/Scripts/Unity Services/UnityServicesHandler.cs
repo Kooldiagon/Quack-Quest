@@ -4,9 +4,11 @@ public class UnityServicesHandler : SingletonMonoBehaviour<UnityServicesHandler>
 {
     private UserAuthentication userAuthentication;
     private RemoteConfig remoteConfig;
+    private CloudSave cloudSave;
 
     public UserAuthentication UserAuthentication { get => userAuthentication; }
     public RemoteConfig RemoteConfig { get => remoteConfig; }
+    public CloudSave CloudSave { get => cloudSave; }
 
     public override void Awake()
     {
@@ -24,6 +26,9 @@ public class UnityServicesHandler : SingletonMonoBehaviour<UnityServicesHandler>
 
         remoteConfig = new RemoteConfig();
         await remoteConfig.Initialise();
+
+        cloudSave = new CloudSave();
+
 
         EventHandler.Instance.ServicesInitialised();
     }

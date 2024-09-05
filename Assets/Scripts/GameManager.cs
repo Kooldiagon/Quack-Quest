@@ -1,14 +1,17 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 
 public class GameManager : SingletonMonoBehaviour<GameManager>
 {
     [SerializeField] private Deck deck;
+    [SerializeField] private GameObject home;
     private int score, combo, health, coloums, rows, cardsMatched;
     private Card currentCard;
     private GameConfig gameData;
     private NumberGenerator generator;
+    [SerializeField] private SaveData saveData;
 
     public int Score { get => score; }
     public int Combo { get => combo; }
@@ -17,15 +20,30 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
     public int Rows { get => rows; }
     public NumberGenerator Generator { get => generator; }
     public GameConfig GameData { get => gameData; }
+    public SaveData SaveData { get => saveData; }
 
     private void OnEnable()
     {
         EventHandler.Instance.OnCardClicked += CheckCard;
+        EventHandler.Instance.OnServicesInitialised += LoadData;
     }
 
     private void OnDisable()
     {
         EventHandler.Instance.OnCardClicked -= CheckCard;
+    }
+
+    public void LoadData()
+    {
+        EventHandler.Instance.OnServicesInitialised -= LoadData;
+        Task.Run(async () =>
+        {
+            saveData = await UnityServicesHandler.Instance.CloudSave.Load<SaveData>("SaveData");
+        }).ContinueWith(task =>
+        {
+            UIHandler.Instance.LoadUI();
+            Debug.Log(saveData.Highscore);
+        }, TaskScheduler.FromCurrentSynchronizationContext());
     }
 
     public void NewGame()
@@ -44,6 +62,8 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
 
     public void CheckCard(Card card)
     {
+        if (health == 0) return;
+
         if (currentCard == null)
         {
             currentCard = card;
@@ -147,5 +167,30 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
         if (health == newValue) return;
         health = newValue;
         EventHandler.Instance.HealthChanged();
+        if (health == 0) UIHandler.Instance.ShowPopUp(GameEnded(), ReturnHome, null);
+    }
+
+    private string GameEnded()
+    {
+        string goText = "Game Over\n\n";
+
+        if (score > saveData.Highscore)
+        {
+            goText += "New Highscore\n";
+            saveData.Highscore = score;
+            UnityServicesHandler.Instance.CloudSave.Save("SaveData", saveData);
+        }
+        else
+        {
+            goText += "Score\n";
+        }
+
+        goText += $"{score}";
+        return goText;
+    }
+
+    public void ReturnHome()
+    {
+        UIHandler.Instance.ChangeScreen(home);
     }
 }

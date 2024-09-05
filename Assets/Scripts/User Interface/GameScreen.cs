@@ -78,4 +78,19 @@ public class GameScreen : MonoBehaviour
         healthText.SetText($"{GameManager.Instance.Health}");
         UIHandler.Instance.Refresh(grid.GetComponent<RectTransform>());
     }
+
+    public void PauseButton()
+    {
+        UIHandler.Instance.ShowPopUp("Are you sure you want to pause your run and return to the home screen?\n\nYou can resume your run at a later date.", AcceptPB, DeclinePB);
+    }
+
+    private void AcceptPB()
+    {
+        GameManager.Instance.ReturnHome();
+    }
+
+    private void DeclinePB()
+    {
+
+    }
 }

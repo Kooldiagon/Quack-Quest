@@ -1,25 +1,23 @@
 using Newtonsoft.Json;
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 [Serializable]
 public class GameConfig
 {
-    [JsonProperty("startScore"), SerializeField] private int startScore;
-    [JsonProperty("startCombo"), SerializeField] private int startCombo;
-    [JsonProperty("startHealth"), SerializeField] private int startHealth;
-    [JsonProperty("startColumn"), SerializeField] private int startColumn;
-    [JsonProperty("startRow"), SerializeField] private int startRow;
-    [JsonProperty("newLevelCardIncrease"), SerializeField] private int newLevelCardIncrease;
-    [JsonProperty("newLevelHealthGain"), SerializeField] private int newLevelHealthGain;
+    [JsonProperty("startScore"), SerializeField] private int startScore; // Starting score for a new game
+    [JsonProperty("startCombo"), SerializeField] private int startCombo; // Starting combo for a new game
+    [JsonProperty("startHealth"), SerializeField] private int startHealth; // Starting health for a new game
+    [JsonProperty("startColumn"), SerializeField] private int startColumn; // The number of card columns at the start of the game
+    [JsonProperty("startRow"), SerializeField] private int startRow; // The number of card rows at the start of the game
+    [JsonProperty("newLevelCardIncrease"), SerializeField] private int newLevelCardIncrease; // Number of columns or rows to add upon a new level
+    [JsonProperty("newLevelHealthGain"), SerializeField] private int newLevelHealthGain; // The health to give to the player upon a new level
 
-    [JsonProperty("maxColumns"), SerializeField] private int maxColumns;
-    [JsonProperty("maxRows"), SerializeField] private int maxRows;
+    [JsonProperty("maxColumns"), SerializeField] private int maxColumns; // Max card columns
+    [JsonProperty("maxRows"), SerializeField] private int maxRows; // Max card rows
 
-    [JsonProperty("timePerCard"), SerializeField] private float timePerCard;
-    [JsonProperty("cardAnimationFrames"), SerializeField] private int cardAnimationFrames;
+    [JsonProperty("timePerCard"), SerializeField] private float timePerCard; // The time to show per card at the start of a level
+    [JsonProperty("cardAnimationFrames"), SerializeField] private int cardAnimationFrames; // The number of Fixed Updates the flip animation takes
 
     [JsonIgnore] public int StartScore { get => startScore; }
     [JsonIgnore] public int StartCombo { get => startCombo; }
