@@ -1,0 +1,13 @@
+{
+  "startScore": 0,
+  "startCombo": 0,
+  "startHealth": 5,
+  "startColumn": 3,
+  "startRow": 3,
+  "newLevelCardIncrease": 1,
+  "newLevelHealthGain": 2,
+  "maxColumns": 15,
+  "maxRows": 10,
+  "timePerCard": 0.2,
+  "cardAnimationFrames": 18
+}

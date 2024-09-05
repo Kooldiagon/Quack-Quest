@@ -50,11 +50,10 @@ public class Card : MonoBehaviour
             endScale = 1f;
         }
 
-        float totalFrames = 20;
-        for (float f = 1; f <= totalFrames; f++)
+        for (float f = 1; f <= GameManager.Instance.GameData.CardAnimationFrames; f++)
         {
-            transform.localScale = new Vector3(Mathf.Lerp(startScale, endScale, f / totalFrames), 1, 1);
-            if (f == (totalFrames / 2))
+            transform.localScale = new Vector3(Mathf.Lerp(startScale, endScale, f / GameManager.Instance.GameData.CardAnimationFrames), 1, 1);
+            if (f == (GameManager.Instance.GameData.CardAnimationFrames / 2))
             {
                 image.sprite = targetSprite;
             }

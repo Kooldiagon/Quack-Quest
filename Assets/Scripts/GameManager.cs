@@ -7,15 +7,16 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
     [SerializeField] private Deck deck;
     private int score, combo, health, coloums, rows, cardsMatched;
     private Card currentCard;
-
+    private GameConfig gameData;
     private NumberGenerator generator;
 
     public int Score { get => score; }
     public int Combo { get => combo; }
     public int Health { get => health; }
     public int Coloums { get => coloums; }
-    public NumberGenerator Generator { get => generator; }
     public int Rows { get => rows; }
+    public NumberGenerator Generator { get => generator; }
+    public GameConfig GameData { get => gameData; }
 
     private void OnEnable()
     {
@@ -29,13 +30,14 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
 
     public void NewGame()
     {
+        gameData = UnityServicesHandler.Instance.RemoteConfig.Json<GameConfig>("Game Data");
         generator = new NumberGenerator((int)DateTime.UtcNow.Ticks);
 
-        SetScore(0);
-        SetCombo(0);
-        SetHealth(5);
-        coloums = 2;
-        rows = 2;
+        SetScore(gameData.StartScore);
+        SetCombo(gameData.StartCombo);
+        SetHealth(gameData.StartHealth);
+        coloums = gameData.StartColumn;
+        rows = gameData.StartRow;
 
         ShuffleCards();
     }
@@ -62,23 +64,47 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
         {
             currentCard.Flip();
             card.Flip();
-            SetCombo(0);
+            SetCombo(gameData.StartCombo);
             SetHealth(health - 1);
         }
         currentCard = null;
     }
 
-    private void NewLevel()
+    private void IncreaseCards()
     {
+        // Exiting if already maxed out
+        if (coloums == gameData.MaxColumns && rows == gameData.MaxRows)
+        {
+            return;
+        }
+
+        if (coloums == gameData.MaxColumns)
+        {
+            rows += gameData.NewLevelCardIncrease;
+            return;
+        }
+
+        if (rows == gameData.MaxRows)
+        {
+            coloums += gameData.NewLevelCardIncrease;
+            return;
+        }
+
+        // Alternating
         if (coloums == rows)
         {
-            coloums += 1;
+            coloums += gameData.NewLevelCardIncrease;
         }
         else
         {
-            rows += 1;
+            rows += gameData.NewLevelCardIncrease;
         }
-        SetHealth(health + 2);
+    }
+
+    private void NewLevel()
+    {
+        IncreaseCards();
+        SetHealth(health + gameData.NewLevelHealthGain);
         ShuffleCards();
     }
 

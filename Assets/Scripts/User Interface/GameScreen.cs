@@ -43,6 +43,7 @@ public class GameScreen : MonoBehaviour
             cards.RemoveAt(index);
         }
         StartCoroutine(FlipAllCards());
+
         UpdateScore();
         UpdateCombo();
         UpdateHealth();
@@ -50,7 +51,7 @@ public class GameScreen : MonoBehaviour
 
     private IEnumerator FlipAllCards()
     {
-        yield return new WaitForSeconds(3f);
+        yield return new WaitForSeconds(gridRT.childCount * GameManager.Instance.GameData.TimePerCard);
 
         foreach (Transform child in gridRT)
         {
