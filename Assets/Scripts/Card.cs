@@ -4,9 +4,13 @@ using UnityEngine.UI;
 
 public class Card : MonoBehaviour
 {
-    [SerializeField] private Sprite front, back;
+    [SerializeField] private Sprite back;
+    private Sprite front;
     private Image image;
     private Button button;
+    private string cardID;
+
+    public string CardID { get => cardID; }
 
     void Awake()
     {
@@ -15,39 +19,50 @@ public class Card : MonoBehaviour
     }
 
     // Handles setting up the card values
-    public void SetUp()
+    public void SetUp(Sprite _front)
     {
-
+        front = _front;
+        image.sprite = front;
+        cardID = _front.name;
+        button.interactable = false;
     }
 
-    // Called when the card is clicked
-    public void Clicked()
+    // Called when the card is clicked by the player
+    public void PlayerFlip()
     {
-        StartCoroutine(Flip());
+        Flip();
+        EventHandler.Instance.CardClicked(this);
     }
 
-    private IEnumerator Flip()
+    public void Flip()
+    {
+        StartCoroutine(FlipAnimation());
+    }
+
+    private IEnumerator FlipAnimation()
     {
         button.interactable = false;
 
         Sprite targetSprite = back;
-        int direction = 1;
-        if(transform.rotation.eulerAngles.y == -180)
+        float startScale = transform.localScale.x, endScale = -1f;
+        if(startScale <= -1)
         {
             targetSprite = front;
-            direction = -1;
+            endScale = 1f;
         }
 
-        int totalFrames = 18;
-        for (int f = 1; f <= totalFrames; f++)
+        float totalFrames = 20;
+        for (float f = 1; f <= totalFrames; f++)
         {
-            transform.rotation = Quaternion.Euler(0, transform.rotation.eulerAngles.y + ((180f / totalFrames) * direction), 0);
+            transform.localScale = new Vector3(Mathf.Lerp(startScale, endScale, f / totalFrames), 1, 1);
             if (f == (totalFrames / 2))
             {
                 image.sprite = targetSprite;
             }
             yield return new WaitForFixedUpdate();
         }
-        button.interactable = true;
+
+        if (image.sprite == back) button.interactable = true;
+
     }
 }

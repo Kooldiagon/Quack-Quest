@@ -124,7 +124,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 6958259512363944548}
         m_TargetAssemblyTypeName: Card, Assembly-CSharp
-        m_MethodName: Clicked
+        m_MethodName: PlayerFlip
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -146,5 +146,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e57fd1b375748ef4188bf19539c3c1fb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  front: {fileID: 21300000, guid: 0ad3ca2baaacee14999ec5b5d21906fa, type: 3}
   back: {fileID: 21300000, guid: a0f03774376d4e44a9ca1ec507ed91ce, type: 3}
