@@ -2,6 +2,7 @@
   "colours": {
     "Background": "#2271E5",
     "Interactable": "#7022E5",
-    "Font": "#E7E7E7"
+    "Font": "#E7E7E7",
+    "SliderBackground": "#C8A8F9"
   }
 }

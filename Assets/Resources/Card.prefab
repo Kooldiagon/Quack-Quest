@@ -146,4 +146,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e57fd1b375748ef4188bf19539c3c1fb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  flipAudio: {fileID: 8300000, guid: 955f47eb9bb7bfe498502cee280661c9, type: 3}
   back: {fileID: 21300000, guid: a0f03774376d4e44a9ca1ec507ed91ce, type: 3}

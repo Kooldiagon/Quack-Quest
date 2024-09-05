@@ -4,6 +4,7 @@ namespace QuackQuest
     {
         Background,
         Interactable,
-        Font
+        Font,
+        SliderBackground
     }
 }

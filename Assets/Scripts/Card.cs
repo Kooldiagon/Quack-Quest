@@ -4,6 +4,7 @@ using UnityEngine.UI;
 
 public class Card : MonoBehaviour
 {
+    [SerializeField] private AudioClip flipAudio;
     [SerializeField] private Sprite back;
     private Sprite front;
     private Image image;
@@ -51,6 +52,7 @@ public class Card : MonoBehaviour
             endScale = 1f;
         }
 
+        if (playerInteraction) AudioHandler.Instance.PlaySound(flipAudio);
         for (float f = 1; f <= GameManager.Instance.GameData.CardAnimationFrames; f++)
         {
             transform.localScale = new Vector3(Mathf.Lerp(startScale, endScale, f / GameManager.Instance.GameData.CardAnimationFrames), 1, 1);

@@ -7,7 +7,8 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
 {
     [SerializeField] private Deck deck;
     [SerializeField] private GameObject home;
-    private int score, combo, health, coloums, rows, cardsMatched;
+    [SerializeField] private AudioClip match, mismatch, gameOver;
+    private int score, combo, health, coloums, rows, cardsMatched, gameSeed;
     private Card currentCard;
     private GameConfig gameData;
     private NumberGenerator generator;
@@ -42,14 +43,14 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
         }).ContinueWith(task =>
         {
             UIHandler.Instance.LoadUI();
-            Debug.Log(saveData.Highscore);
         }, TaskScheduler.FromCurrentSynchronizationContext());
     }
 
     public void NewGame()
     {
         gameData = UnityServicesHandler.Instance.RemoteConfig.Json<GameConfig>("Game Data");
-        generator = new NumberGenerator((int)DateTime.UtcNow.Ticks);
+        gameSeed = (int)DateTime.UtcNow.Ticks;
+        generator = new NumberGenerator(gameSeed);
 
         SetScore(gameData.StartScore);
         SetCombo(gameData.StartCombo);
@@ -72,6 +73,7 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
 
         if (currentCard.CardID == card.CardID)
         {
+            AudioHandler.Instance.PlaySound(match);
             SetCombo(combo + 1);
             SetScore(score + combo);
             cardsMatched++;
@@ -82,6 +84,7 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
         }
         else
         {
+            AudioHandler.Instance.PlaySound(mismatch);
             currentCard.Flip();
             card.Flip();
             SetCombo(gameData.StartCombo);
@@ -123,6 +126,8 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
 
     private void NewLevel()
     {
+        gameSeed = (int)DateTime.UtcNow.Ticks;
+        generator = new NumberGenerator(gameSeed);
         IncreaseCards();
         SetHealth(health + gameData.NewLevelHealthGain);
         ShuffleCards();
@@ -172,6 +177,7 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
 
     private string GameEnded()
     {
+        AudioHandler.Instance.PlaySound(gameOver);
         string goText = "Game Over\n\n";
 
         if (score > saveData.Highscore)

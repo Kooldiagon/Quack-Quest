@@ -57,7 +57,6 @@ public class UIHandler : SingletonMonoBehaviour<UIHandler>
     private IEnumerator DelayRefresh(RectTransform rectTransform)
     {
         yield return new WaitForEndOfFrame();
-        yield return new WaitForEndOfFrame();
         LayoutRebuilder.ForceRebuildLayoutImmediate(rectTransform);
     }
 }

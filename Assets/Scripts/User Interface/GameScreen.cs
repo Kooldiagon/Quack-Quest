@@ -9,7 +9,7 @@ public class GameScreen : MonoBehaviour
     [SerializeField] private UIText scoreText, comboText, healthText;
     [SerializeField] private GameObject cardPrefab;
     [SerializeField] private GridLayoutGroup grid;
-    [SerializeField] private RectTransform gridRT;
+    [SerializeField] private RectTransform infoRT, gridRT;
 
     void OnEnable()
     {
@@ -64,19 +64,19 @@ public class GameScreen : MonoBehaviour
     private void UpdateScore()
     {
         scoreText.SetText($"{GameManager.Instance.Score}");
-        UIHandler.Instance.Refresh(grid.GetComponent<RectTransform>());
+        UIHandler.Instance.Refresh(infoRT);
     }
 
     private void UpdateCombo()
     {
         comboText.SetText($"{GameManager.Instance.Combo}");
-        UIHandler.Instance.Refresh(grid.GetComponent<RectTransform>());
+        UIHandler.Instance.Refresh(infoRT);
     }
 
     private void UpdateHealth()
     {
         healthText.SetText($"{GameManager.Instance.Health}");
-        UIHandler.Instance.Refresh(grid.GetComponent<RectTransform>());
+        UIHandler.Instance.Refresh(infoRT);
     }
 
     public void PauseButton()
