@@ -33,6 +33,7 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
         EventHandler.Instance.OnCardClicked -= CheckCard;
     }
 
+    // Starts the game after Unity Services have finished initialising
     public void Load()
     {
         EventHandler.Instance.OnServicesInitialised -= Load;
@@ -41,6 +42,7 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
         gameData = UnityServicesHandler.Instance.RemoteConfig.Json<GameConfig>("Game Data");
     }
 
+    // Called when the user loads an existing run
     public void LoadGame()
     {
         currentCard = null;
@@ -58,6 +60,7 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
         if(gameProgress.CurrentCardIndex != -1) orderedCards[gameProgress.CurrentCardIndex].InstantFlip(1, true);
     }
 
+    // Called when the user starts a new run
     public void NewGame()
     {
         gameProgress = new GameInProgress();
@@ -76,10 +79,12 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
         EventHandler.Instance.HideCountdown();
     }
 
+    // Called to check for match
     public void CheckCard(Card card)
     {
-        if (gameProgress.Health == 0) return;
+        if (gameProgress.Health == 0) return; // Prevents queued card flips from being actioned
 
+        // No other card to compare with
         if (currentCard == null)
         {
             currentCard = card;
@@ -88,6 +93,7 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
 
         if (currentCard.CardID == card.CardID)
         {
+            // Match
             AudioHandler.Instance.PlaySound(match);
             SetCombo(gameProgress.Combo + 1);
             SetScore(gameProgress.Score + gameProgress.Combo);
@@ -100,6 +106,7 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
         }
         else
         {
+            // Mismatch
             AudioHandler.Instance.PlaySound(mismatch);
             currentCard.Flip();
             card.Flip();
@@ -140,6 +147,7 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
         }
     }
 
+    // Creates a new level, called after the player completes a level
     private void NewLevel()
     {
         gameProgress.GameSeed = (int)DateTime.UtcNow.Ticks;
@@ -153,6 +161,7 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
         EventHandler.Instance.HideCountdown();
     }
 
+    // Assigns the cards which the player needs to match (does not handle assigning positions)
     private void ShuffleCards()
     {
         orderedCards = new List<Card>();

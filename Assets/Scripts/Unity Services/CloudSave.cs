@@ -8,11 +8,11 @@ public class CloudSave
 {
     public async Task Initialise()
     {
-        JsonSerializerSettings settings = new JsonSerializerSettings();
         var data = await CloudSaveService.Instance.Data.Player.LoadAsync(new HashSet<string> { "SaveData" });
-        if (data.TryGetValue("SaveData", out var pair))
+
+        if (data.TryGetValue("SaveData", out var item))
         {
-            GameManager.Instance.SaveData = JsonConvert.DeserializeObject<SaveData>(pair.Value.GetAs<string>(), settings);
+            GameManager.Instance.SaveData = item.Value.GetAs<SaveData>();
         }
         else
         {

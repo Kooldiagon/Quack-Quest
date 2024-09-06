@@ -16,7 +16,7 @@ public class GameScreen : MonoBehaviour
         EventHandler.Instance.OnScoreChanged += UpdateScore;
         EventHandler.Instance.OnComboChanged += UpdateCombo;
         EventHandler.Instance.OnHealthChanged += UpdateHealth;
-        EventHandler.Instance.OnCardsShuffled += NewPile;
+        EventHandler.Instance.OnCardsShuffled += DrawPile;
         EventHandler.Instance.OnHideCountdown += CountdownToHide;
     }
 
@@ -25,11 +25,12 @@ public class GameScreen : MonoBehaviour
         EventHandler.Instance.OnScoreChanged -= UpdateScore;
         EventHandler.Instance.OnComboChanged -= UpdateCombo;
         EventHandler.Instance.OnHealthChanged -= UpdateHealth;
-        EventHandler.Instance.OnCardsShuffled -= NewPile;
+        EventHandler.Instance.OnCardsShuffled -= DrawPile;
         EventHandler.Instance.OnHideCountdown += CountdownToHide;
     }
 
-    private void NewPile(List<Sprite> cards)
+    // Draws the cards and assigns their positions
+    private void DrawPile(List<Sprite> cards)
     {
         UIHandler.Instance.ClearChildren(gridRT);
         float width = (float)Screen.width + gridRT.sizeDelta.x, height = (float)Screen.height + gridRT.sizeDelta.y;
@@ -58,6 +59,7 @@ public class GameScreen : MonoBehaviour
         StartCoroutine(FlipAllCards());
     }
 
+    // Flips all cards to hide them
     private IEnumerator FlipAllCards()
     {
         yield return new WaitForSeconds(gridRT.childCount * GameManager.Instance.GameData.TimePerCard);
@@ -65,6 +67,7 @@ public class GameScreen : MonoBehaviour
         foreach (Transform child in gridRT)
         {
             child.GetComponent<Card>().Flip();
+            // Delay for animation effect
             yield return new WaitForFixedUpdate();
             yield return new WaitForFixedUpdate();
         }

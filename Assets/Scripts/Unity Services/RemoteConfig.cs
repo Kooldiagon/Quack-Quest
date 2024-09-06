@@ -3,7 +3,6 @@ using Unity.Services.RemoteConfig;
 using System.Threading.Tasks;
 using System;
 using Newtonsoft.Json;
-using System.IO;
 
 public class RemoteConfig
 {
@@ -45,7 +44,8 @@ public class RemoteConfig
     public T Json<T>(string key) where T : class
     {
         JsonSerializerSettings settings = new JsonSerializerSettings();
-        string jsonString = RemoteConfigService.Instance.appConfig.GetJson(key, File.ReadAllText($"{Application.dataPath}/Data/Default Configs/{key}.json"));
+        TextAsset jsonFile = Resources.Load<TextAsset>($"Default Configs/{key}");
+        string jsonString = RemoteConfigService.Instance.appConfig.GetJson(key, jsonFile.text);
         try
         {
             return JsonConvert.DeserializeObject<T>(jsonString, settings);
