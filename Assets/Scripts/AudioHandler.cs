@@ -9,7 +9,7 @@ public class AudioHandler : SingletonMonoBehaviour<AudioHandler>
     [SerializeField] private AudioSource musicSource;
     private List<AudioSource> audioSources;
 
-    private void Start()
+    public void LoadAudio()
     {
         AdjustMusicVolume(GameManager.Instance.SaveData.MusicVolume);
         AdjustSoundVolume(GameManager.Instance.SaveData.SoundVolume);

@@ -1,37 +1,35 @@
 using Newtonsoft.Json;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 using Unity.Services.CloudSave;
 using UnityEngine;
 
 public class CloudSave
 {
-    public async void Save(string key, object data)
+    public async Task Initialise()
+    {
+        JsonSerializerSettings settings = new JsonSerializerSettings();
+        var data = await CloudSaveService.Instance.Data.Player.LoadAsync(new HashSet<string> { "SaveData" });
+        if (data.TryGetValue("SaveData", out var pair))
+        {
+            GameManager.Instance.SaveData = JsonConvert.DeserializeObject<SaveData>(pair.Value.GetAs<string>(), settings);
+        }
+        else
+        {
+            GameManager.Instance.SaveData = new SaveData();
+            Save();
+        }
+    }
+
+    public async void Save()
     {
         var dataToSave = new Dictionary<string, object>
         {
-            { key, data }
+            { "SaveData", GameManager.Instance.SaveData }
         };
 
         // Save the data to the cloud
         await Call(CloudSaveService.Instance.Data.Player.SaveAsync(dataToSave));
-    }
-
-    public async Task<T> Load<T>(string key) where T : class, new()
-    {
-        JsonSerializerSettings settings = new JsonSerializerSettings();
-
-        var data = await CloudSaveService.Instance.Data.Player.LoadAsync(new HashSet<string> { key });
-        if (data.TryGetValue(key, out var pair))
-        {
-            return JsonConvert.DeserializeObject<T>(pair.Value.GetAs<string>(), settings);
-        }
-        else
-        {
-            Save(key, new T());
-            return new T();
-        }
     }
 
     private async Task Call(Task action)

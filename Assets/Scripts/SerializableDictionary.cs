@@ -18,7 +18,7 @@ public class SerializableDictionary<TKey, TValue> : Dictionary<TKey, TValue>, IS
         }
     }
 
-    public void GetObjectData(SerializationInfo info, StreamingContext context)
+    public new void GetObjectData(SerializationInfo info, StreamingContext context)
     {
         info.AddValue("Count", this.Count);
         int i = 0;

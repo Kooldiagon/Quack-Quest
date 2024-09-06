@@ -25,7 +25,7 @@ public class SettingsScreen : MonoBehaviour
     {
         GameManager.Instance.SaveData.MusicVolume = (int)musicSlider.Slider.value;
         GameManager.Instance.SaveData.SoundVolume = (int)soundSlider.Slider.value;
-        UnityServicesHandler.Instance.CloudSave.Save("SaveData", GameManager.Instance.SaveData);
+        UnityServicesHandler.Instance.CloudSave.Save();
         UIHandler.Instance.ChangeScreen(screen);
     }
 

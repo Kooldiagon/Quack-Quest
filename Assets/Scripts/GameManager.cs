@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using UnityEngine;
 
 public class GameManager : SingletonMonoBehaviour<GameManager>
@@ -8,25 +7,25 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
     [SerializeField] private Deck deck;
     [SerializeField] private GameObject home;
     [SerializeField] private AudioClip match, mismatch, gameOver;
-    private int score, combo, health, coloums, rows, cardsMatched, gameSeed;
+
+    private GameInProgress gameProgress;
+
     private Card currentCard;
     private GameConfig gameData;
     private NumberGenerator generator;
-    [SerializeField] private SaveData saveData;
+    private SaveData saveData;
+    private List<Card> orderedCards;
 
-    public int Score { get => score; }
-    public int Combo { get => combo; }
-    public int Health { get => health; }
-    public int Coloums { get => coloums; }
-    public int Rows { get => rows; }
     public NumberGenerator Generator { get => generator; }
     public GameConfig GameData { get => gameData; }
-    public SaveData SaveData { get => saveData; }
+    public SaveData SaveData { get => saveData; set => saveData = value; }
+    public GameInProgress GameProgress { get => gameProgress; }
+    public List<Card> OrderedCards { get => orderedCards; }
 
     private void OnEnable()
     {
         EventHandler.Instance.OnCardClicked += CheckCard;
-        EventHandler.Instance.OnServicesInitialised += LoadData;
+        EventHandler.Instance.OnServicesInitialised += Load;
     }
 
     private void OnDisable()
@@ -34,36 +33,52 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
         EventHandler.Instance.OnCardClicked -= CheckCard;
     }
 
-    public void LoadData()
+    public void Load()
     {
-        EventHandler.Instance.OnServicesInitialised -= LoadData;
-        Task.Run(async () =>
+        EventHandler.Instance.OnServicesInitialised -= Load;
+        UIHandler.Instance.LoadUI();
+        AudioHandler.Instance.LoadAudio();
+        gameData = UnityServicesHandler.Instance.RemoteConfig.Json<GameConfig>("Game Data");
+    }
+
+    public void LoadGame()
+    {
+        currentCard = null;
+        gameProgress = saveData.ExistingGame;
+        generator = new NumberGenerator(gameProgress.GameSeed);
+        ShuffleCards();
+        foreach (Card card in orderedCards)
         {
-            saveData = await UnityServicesHandler.Instance.CloudSave.Load<SaveData>("SaveData");
-        }).ContinueWith(task =>
-        {
-            UIHandler.Instance.LoadUI();
-        }, TaskScheduler.FromCurrentSynchronizationContext());
+            // Checks that the card has not already been matched
+            if (!gameProgress.MatchedCards.Contains(card.PositionIndex))
+            {
+                card.InstantFlip(-1, false);
+            }
+        }
+        if(gameProgress.CurrentCardIndex != -1) orderedCards[gameProgress.CurrentCardIndex].InstantFlip(1, true);
     }
 
     public void NewGame()
     {
-        gameData = UnityServicesHandler.Instance.RemoteConfig.Json<GameConfig>("Game Data");
-        gameSeed = (int)DateTime.UtcNow.Ticks;
-        generator = new NumberGenerator(gameSeed);
+        gameProgress = new GameInProgress();
+        gameProgress.GameSeed = (int)DateTime.UtcNow.Ticks;
+        generator = new NumberGenerator(gameProgress.GameSeed);
 
         SetScore(gameData.StartScore);
         SetCombo(gameData.StartCombo);
         SetHealth(gameData.StartHealth);
-        coloums = gameData.StartColumn;
-        rows = gameData.StartRow;
+        gameProgress.Columns = gameData.StartColumn;
+        gameProgress.Rows = gameData.StartRow;
+        gameProgress.MatchedCards = new List<int>();
+        currentCard = null;
 
         ShuffleCards();
+        EventHandler.Instance.HideCountdown();
     }
 
     public void CheckCard(Card card)
     {
-        if (health == 0) return;
+        if (gameProgress.Health == 0) return;
 
         if (currentCard == null)
         {
@@ -74,10 +89,11 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
         if (currentCard.CardID == card.CardID)
         {
             AudioHandler.Instance.PlaySound(match);
-            SetCombo(combo + 1);
-            SetScore(score + combo);
-            cardsMatched++;
-            if (cardsMatched == (int)Math.Floor((double)(coloums * rows) / 2))
+            SetCombo(gameProgress.Combo + 1);
+            SetScore(gameProgress.Score + gameProgress.Combo);
+            gameProgress.MatchedCards.Add(currentCard.PositionIndex);
+            gameProgress.MatchedCards.Add(card.PositionIndex);
+            if (gameProgress.MatchedCards.Count == orderedCards.Count)
             {
                 NewLevel();
             }
@@ -88,7 +104,7 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
             currentCard.Flip();
             card.Flip();
             SetCombo(gameData.StartCombo);
-            SetHealth(health - 1);
+            SetHealth(gameProgress.Health - 1);
         }
         currentCard = null;
     }
@@ -96,51 +112,53 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
     private void IncreaseCards()
     {
         // Exiting if already maxed out
-        if (coloums == gameData.MaxColumns && rows == gameData.MaxRows)
+        if (gameProgress.Columns == gameData.MaxColumns && gameProgress.Rows == gameData.MaxRows)
         {
             return;
         }
 
-        if (coloums == gameData.MaxColumns)
+        if (gameProgress.Columns == gameData.MaxColumns)
         {
-            rows += gameData.NewLevelCardIncrease;
+            gameProgress.Rows += gameData.NewLevelCardIncrease;
             return;
         }
 
-        if (rows == gameData.MaxRows)
+        if (gameProgress.Rows == gameData.MaxRows)
         {
-            coloums += gameData.NewLevelCardIncrease;
+            gameProgress.Columns += gameData.NewLevelCardIncrease;
             return;
         }
 
         // Alternating
-        if (coloums == rows)
+        if (gameProgress.Columns == gameProgress.Rows)
         {
-            coloums += gameData.NewLevelCardIncrease;
+            gameProgress.Columns += gameData.NewLevelCardIncrease;
         }
         else
         {
-            rows += gameData.NewLevelCardIncrease;
+            gameProgress.Rows += gameData.NewLevelCardIncrease;
         }
     }
 
     private void NewLevel()
     {
-        gameSeed = (int)DateTime.UtcNow.Ticks;
-        generator = new NumberGenerator(gameSeed);
+        gameProgress.GameSeed = (int)DateTime.UtcNow.Ticks;
+        generator = new NumberGenerator(gameProgress.GameSeed);
         IncreaseCards();
-        SetHealth(health + gameData.NewLevelHealthGain);
+        SetHealth(gameProgress.Health + gameData.NewLevelHealthGain);
+        gameProgress.MatchedCards = new List<int>();
+        currentCard = null;
+
         ShuffleCards();
+        EventHandler.Instance.HideCountdown();
     }
 
     private void ShuffleCards()
     {
-        cardsMatched = 0;
-        currentCard = null;
-
+        orderedCards = new List<Card>();
         List<Sprite> possibleCards = new List<Sprite>(deck.Cards);
         List<Sprite> cards = new List<Sprite>();
-        for (int c = 0; c < (int)Math.Floor((double)(coloums * rows) / 2); c++)
+        for (int c = 0; c < (int)Math.Floor((double)(gameProgress.Columns * gameProgress.Rows) / 2); c++)
         {
             int index = generator.RandomInt(0, possibleCards.Count - 1);
             for (int i = 0; i < 2; i++)
@@ -155,24 +173,24 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
 
     private void SetScore(int newValue)
     {
-        if (score == newValue) return;
-        score = newValue;
+        if (gameProgress.Score == newValue) return;
+        gameProgress.Score = newValue;
         EventHandler.Instance.ScoreChanged();
     }
 
     private void SetCombo(int newValue)
     {
-        if (combo == newValue) return;
-        combo = newValue;
+        if (gameProgress.Combo == newValue) return;
+        gameProgress.Combo = newValue;
         EventHandler.Instance.ComboChanged();
     }
 
     private void SetHealth(int newValue)
     {
-        if (health == newValue) return;
-        health = newValue;
+        if (gameProgress.Health == newValue) return;
+        gameProgress.Health = newValue;
         EventHandler.Instance.HealthChanged();
-        if (health == 0) UIHandler.Instance.ShowPopUp(GameEnded(), ReturnHome, null);
+        if (gameProgress.Health == 0) UIHandler.Instance.ShowPopUp(GameEnded(), ReturnHome, null);
     }
 
     private string GameEnded()
@@ -180,23 +198,46 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
         AudioHandler.Instance.PlaySound(gameOver);
         string goText = "Game Over\n\n";
 
-        if (score > saveData.Highscore)
+        if (gameProgress.Score > saveData.Highscore)
         {
             goText += "New Highscore\n";
-            saveData.Highscore = score;
-            UnityServicesHandler.Instance.CloudSave.Save("SaveData", saveData);
+            saveData.Highscore = gameProgress.Score;
+            saveData.ExistingGame = new GameInProgress();
+            saveData.InProgress = false;
+            UnityServicesHandler.Instance.CloudSave.Save();
         }
         else
         {
             goText += "Score\n";
         }
 
-        goText += $"{score}";
+        goText += $"{gameProgress.Score}";
         return goText;
+    }
+
+    public void SaveProgress()
+    {
+        if (currentCard != null)
+        {
+            gameProgress.CurrentCardIndex = currentCard.PositionIndex;
+        }
+        else
+        {
+            gameProgress.CurrentCardIndex = -1;
+        }
+
+        saveData.InProgress = true;
+        saveData.ExistingGame = gameProgress;
+        UnityServicesHandler.Instance.CloudSave.Save();
     }
 
     public void ReturnHome()
     {
         UIHandler.Instance.ChangeScreen(home);
+    }
+
+    private void OnApplicationQuit()
+    {
+        SaveProgress();
     }
 }

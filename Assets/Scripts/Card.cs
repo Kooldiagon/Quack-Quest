@@ -10,8 +10,10 @@ public class Card : MonoBehaviour
     private Image image;
     private Button button;
     private string cardID;
+    private int positionIndex;
 
     public string CardID { get => cardID; }
+    public int PositionIndex { get => positionIndex; }
 
     void Awake()
     {
@@ -20,9 +22,10 @@ public class Card : MonoBehaviour
     }
 
     // Handles setting up the card values
-    public void SetUp(Sprite _front)
+    public void SetUp(Sprite _front, int _positionIndex)
     {
         front = _front;
+        positionIndex = _positionIndex;
         image.sprite = front;
         cardID = _front.name;
         button.interactable = false;
@@ -38,6 +41,25 @@ public class Card : MonoBehaviour
     public void Flip()
     {
         StartCoroutine(FlipAnimation(false));
+    }
+
+    // Target Scale 1 = Front
+    public void InstantFlip(float targetScale, bool playerInteraction)
+    {
+        transform.localScale = new Vector3(targetScale, 1, 1);
+        Sprite targetSprite = back;
+        if (targetScale == 1)
+        {
+            targetSprite = front;
+            button.interactable = false;
+        }
+        else
+        {
+            button.interactable = true;
+        }
+        image.sprite = targetSprite;
+
+        if (playerInteraction) EventHandler.Instance.CardClicked(this);
     }
 
     private IEnumerator FlipAnimation(bool playerInteraction)
@@ -65,6 +87,5 @@ public class Card : MonoBehaviour
 
         if (playerInteraction) EventHandler.Instance.CardClicked(this);
         if (image.sprite == back) button.interactable = true;
-
     }
 }

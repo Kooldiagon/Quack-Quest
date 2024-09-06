@@ -28,7 +28,7 @@ public class UnityServicesHandler : SingletonMonoBehaviour<UnityServicesHandler>
         await remoteConfig.Initialise();
 
         cloudSave = new CloudSave();
-
+        await cloudSave.Initialise();
 
         EventHandler.Instance.ServicesInitialised();
     }

@@ -41,6 +41,7 @@ public class UIHandler : SingletonMonoBehaviour<UIHandler>
         Application.Quit();
     }
 
+    // Remove all child objects
     public void ClearChildren(RectTransform rectTransform)
     {
         while (rectTransform.childCount != 0)
@@ -49,11 +50,13 @@ public class UIHandler : SingletonMonoBehaviour<UIHandler>
         }
     }
 
+    // Refreshes a rect transform so that the content size fitter is correct
     public void Refresh(RectTransform rectTransform)
     {
         StartCoroutine(DelayRefresh(rectTransform));
     }
 
+    // Delays refresh to ensure all changes from the frame are accounted for
     private IEnumerator DelayRefresh(RectTransform rectTransform)
     {
         yield return new WaitForEndOfFrame();

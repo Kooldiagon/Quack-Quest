@@ -17,6 +17,7 @@ public class GameScreen : MonoBehaviour
         EventHandler.Instance.OnComboChanged += UpdateCombo;
         EventHandler.Instance.OnHealthChanged += UpdateHealth;
         EventHandler.Instance.OnCardsShuffled += NewPile;
+        EventHandler.Instance.OnHideCountdown += CountdownToHide;
     }
 
     void OnDisable()
@@ -25,28 +26,36 @@ public class GameScreen : MonoBehaviour
         EventHandler.Instance.OnComboChanged -= UpdateCombo;
         EventHandler.Instance.OnHealthChanged -= UpdateHealth;
         EventHandler.Instance.OnCardsShuffled -= NewPile;
+        EventHandler.Instance.OnHideCountdown += CountdownToHide;
     }
 
     private void NewPile(List<Sprite> cards)
     {
         UIHandler.Instance.ClearChildren(gridRT);
         float width = (float)Screen.width + gridRT.sizeDelta.x, height = (float)Screen.height + gridRT.sizeDelta.y;
-        float cellSize = Mathf.Min((width - (grid.spacing.x * (GameManager.Instance.Coloums - 1))) / GameManager.Instance.Coloums, (height - (grid.spacing.y * (GameManager.Instance.Rows - 1))) / GameManager.Instance.Rows);
+        float cellSize = Mathf.Min((width - (grid.spacing.x * (GameManager.Instance.GameProgress.Columns - 1))) / GameManager.Instance.GameProgress.Columns, (height - (grid.spacing.y * (GameManager.Instance.GameProgress.Rows - 1))) / GameManager.Instance.GameProgress.Rows);
         grid.cellSize = Vector2.one * cellSize;
-        grid.constraintCount = GameManager.Instance.Coloums;
+        grid.constraintCount = GameManager.Instance.GameProgress.Columns;
 
+        int i = 0;
         while (cards.Count > 0)
         {
             int index = GameManager.Instance.Generator.RandomInt(0, cards.Count - 1);
             Card card = ObjectPool.Instance.Spawn(cardPrefab, grid.transform).GetComponent<Card>();
-            card.SetUp(cards[index]);
+            card.SetUp(cards[index], i);
             cards.RemoveAt(index);
+            GameManager.Instance.OrderedCards.Add(card);
+            i++;
         }
-        StartCoroutine(FlipAllCards());
 
         UpdateScore();
         UpdateCombo();
         UpdateHealth();
+    }
+
+    private void CountdownToHide()
+    {
+        StartCoroutine(FlipAllCards());
     }
 
     private IEnumerator FlipAllCards()
@@ -63,19 +72,19 @@ public class GameScreen : MonoBehaviour
 
     private void UpdateScore()
     {
-        scoreText.SetText($"{GameManager.Instance.Score}");
+        scoreText.SetText($"{GameManager.Instance.GameProgress.Score}");
         UIHandler.Instance.Refresh(infoRT);
     }
 
     private void UpdateCombo()
     {
-        comboText.SetText($"{GameManager.Instance.Combo}");
+        comboText.SetText($"{GameManager.Instance.GameProgress.Combo}");
         UIHandler.Instance.Refresh(infoRT);
     }
 
     private void UpdateHealth()
     {
-        healthText.SetText($"{GameManager.Instance.Health}");
+        healthText.SetText($"{GameManager.Instance.GameProgress.Health}");
         UIHandler.Instance.Refresh(infoRT);
     }
 
@@ -86,6 +95,7 @@ public class GameScreen : MonoBehaviour
 
     private void AcceptPB()
     {
+        GameManager.Instance.SaveProgress();
         GameManager.Instance.ReturnHome();
     }
 

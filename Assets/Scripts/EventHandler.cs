@@ -42,5 +42,11 @@ public class EventHandler : Singleton<EventHandler>
         OnCardClicked?.Invoke(card);
     }
 
+    public event Action OnHideCountdown;
+    public void HideCountdown() // Called when starting the countdown to hide all cards
+    {
+        OnHideCountdown?.Invoke();
+    }
+
     #endregion
 }
